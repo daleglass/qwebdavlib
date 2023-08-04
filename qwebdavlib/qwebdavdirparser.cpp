@@ -50,11 +50,6 @@
 
 #include "qwebdavdirparser.h"
 
-#if QT_VERSION < 0x051400
-#define RECURSIVE_MUTEX_TYPE QMutex(QMutex::Recursive)
-#else
-#define RECURSIVE_MUTEX_TYPE QRecursiveMutex
-#endif
 
 QWebdavDirParser::QWebdavDirParser(QObject *parent) : QObject(parent)
   ,m_error(QNetworkReply::NoError)
@@ -66,7 +61,7 @@ QWebdavDirParser::QWebdavDirParser(QObject *parent) : QObject(parent)
   ,m_busy(false)
   ,m_abort(false)
 {
-    m_mutex.reset(new RECURSIVE_MUTEX_TYPE);
+    m_mutex.reset(new QRecursiveMutex);
 }
 
 QWebdavDirParser::~QWebdavDirParser()
@@ -408,11 +403,8 @@ void QWebdavDirParser::davParsePropstats(const QString &path, const QDomNodeList
 #endif
 
     // name
-#if QT_VERSION < 0x060000
-    QStringList pathElements = path_.split('/', QString::SkipEmptyParts);
-#else
     QStringList pathElements = path_.split('/', Qt::SkipEmptyParts);
-#endif
+
     name = pathElements.isEmpty() ? "/" : pathElements.back();
 
     for ( int i = 0; i < propstats.count(); i++) {
