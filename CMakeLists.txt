@@ -41,9 +41,21 @@ set(SAMPLE_SOURCES
 add_library(Qt-WebDAV SHARED ${LIBRARY_SOURCES})
 target_link_libraries(Qt-WebDAV Qt${USE_QT_VERSION}::Core Qt${USE_QT_VERSION}::Network Qt${USE_QT_VERSION}::Xml)
 
+if (MSVC)
+    target_compile_options(Qt-WebDAV PUBLIC /W4 /WX)
+else()
+    target_compile_options(Qt-WebDAV PUBLIC -Wall -Wextra -Werror)
+endif()
+
 project(Qt-WebDAV-sample VERSION 0.1 LANGUAGES CXX)
 add_executable(Qt-WebDAV-sample ${SAMPLE_SOURCES})
 
 target_include_directories(Qt-WebDAV-sample PRIVATE qwebdavlib)
 target_link_libraries(Qt-WebDAV-sample Qt-WebDAV)
+
+if (MSVC)
+    target_compile_options(Qt-WebDAV-sample PUBLIC /W4 /WX)
+else()
+    target_compile_options(Qt-WebDAV-sample PUBLIC -Wall -Wextra -Werror)
+endif()
 
