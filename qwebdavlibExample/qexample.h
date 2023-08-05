@@ -6,6 +6,9 @@
 #include <qwebdav.h>
 #include <qwebdavdirparser.h>
 #include <qwebdavitem.h>
+#include <QUrl>
+#include <QTimer>
+
 
 class QExample : public QObject
 {
@@ -15,12 +18,14 @@ class QExample : public QObject
     QWebdavDirParser p;
     QString m_path;
     QList<QNetworkReply *> m_replyList;
+    QTimer m_timeout_timer;
 
 public:
     QExample(QObject* parent = 0);
-    
+    void setUrl(const QUrl &url);
+
 signals:
-    
+
 public slots:
     void printList();
     void printError(QString errorMsg);
