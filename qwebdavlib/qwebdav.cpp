@@ -110,6 +110,23 @@ bool QWebdav::isSSL() const
     return (m_currentConnectionType==QWebdav::HTTPS);
 }
 
+void QWebdav::setConnectionSettings(const QUrl &url,
+                                    const QString &sslCertDigestMd5,
+                                    const QString &sslCertDigestSha1) {
+
+    QWebdav::QWebdavConnectionType davtype = QWebdav::HTTP;
+    quint16 port = 80;
+
+    if ( url.scheme() == "webdavs" || url.scheme() == "davs" || url.scheme() == "https" ) {
+        davtype = QWebdav::HTTPS;
+        port = 443;
+    }
+
+    port = url.port(port);
+
+    setConnectionSettings(davtype, url.host(), url.path(), url.userName(), url.password(), port, sslCertDigestMd5, sslCertDigestSha1);
+}
+
 void QWebdav::setConnectionSettings(const QWebdavConnectionType connectionType,
                                     const QString& hostname,
                                     const QString& rootPath,

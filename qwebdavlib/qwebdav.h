@@ -81,6 +81,22 @@ public:
     QWebdavConnectionType connectionType() const;
     bool isSSL() const;
 
+
+    /**
+     * @brief Set the Connection Settings from a QUrl
+     *
+     * A more convenient function to use, which works by parsing a QUrl.
+     *
+     * The default port is 80, or 443 if the URL scheme is webdavs://, davs:// or https://
+     *
+     * @param url URL
+     * @param sslCertDigestMd5
+     * @param sslCertDigestSha1
+     */
+    void setConnectionSettings(const QUrl &url,
+                               const QString &sslCertDigestMd5 = "",
+                               const QString &sslCertDigestSha1 = "");
+
     void setConnectionSettings( const QWebdavConnectionType connectionType,
                             const QString &hostname,
                             const QString &rootPath = "/",

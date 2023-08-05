@@ -16,27 +16,9 @@ QExample::QExample(QObject *parent) :
 }
 
 void QExample::setUrl(const QUrl &url) {
-    QWebdav::QWebdavConnectionType davtype = QWebdav::HTTP;
-    quint16 port = 80;
+    qInfo() << "Requesting" << url;
 
-    if ( url.scheme() == "webdavs" ) {
-        davtype = QWebdav::HTTPS;
-        port = 443;
-    }
-
-    QString host = url.host();
-    QString path = url.path();
-    QString user = url.userName();
-    QString pass = url.password();
-
-    port = url.port(port);
-
-
-
-    qInfo() << "Connecting to host" << host << "on" << (davtype==QWebdav::HTTP ? "HTTP" : "HTTPS")
-            << "on port" << port << "with user" << user << "pass" << pass << ". Requesting path " << path;
-
-    w.setConnectionSettings(davtype, host, path, user, pass, port);
+    w.setConnectionSettings(url);
 
 }
 
