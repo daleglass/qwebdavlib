@@ -100,6 +100,12 @@ bool QWebdavDirParser::listDirectory(QWebdav *pWebdav, const QString &path)
     m_reply = pWebdav->list(path);
     connect(m_reply, SIGNAL(finished()), this, SLOT(replyFinished()));
 
+#ifdef DEBUG_WEBDAV
+    connect(m_reply, &QNetworkReply::errorOccurred, this, [](QNetworkReply::NetworkError code) { qWarning() << "Error" << code;});
+    connect(m_reply, &QNetworkReply::redirected, this, [](const QUrl &url) { qDebug() << "Redirected to" << url;});
+    connect(m_reply, &QNetworkReply::downloadProgress, this, [](qint64 recv, qint64 total) { qDebug() << "Received" << recv << "of" << total;});
+#endif
+
     if (!m_dirList.isEmpty())
         m_dirList.clear();
 
