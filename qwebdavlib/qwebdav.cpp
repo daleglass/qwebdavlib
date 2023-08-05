@@ -548,8 +548,10 @@ QNetworkReply* QWebdav::propfind(const QString& path, const QByteArray& query, i
     QUrl reqUrl(m_baseUrl);
     reqUrl.setPath(absolutePath(path));
 
+#ifdef DEBUG_WEBDAV
     qCDebug(LOG_WEBDAV) << "propfind query:";
     qCDebug(LOG_WEBDAV) << query;
+#endif
 
     req.setUrl(reqUrl);
     req.setRawHeader("Depth", depth == 2 ? QString("infinity").toUtf8() : QString::number(depth).toUtf8());
