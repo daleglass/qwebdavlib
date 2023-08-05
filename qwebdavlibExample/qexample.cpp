@@ -47,12 +47,14 @@ void QExample::printList()
     QWebdavItem item;
     qInfo() << "=== Received list ===";
     foreach(item, list) {
-        qDebug() << item.name();
+        qDebug() << item.name() << item.size() << item.lastModified();
 
         //QNetworkReply *reply = w.get(item.path());
         //connect(reply, SIGNAL(readyRead()), this, SLOT(replySkipRead()));
         //m_replyList.append(reply);
     }
+
+    QCoreApplication::exit(0);
 }
 
 void QExample::printError(QString errorMsg)
