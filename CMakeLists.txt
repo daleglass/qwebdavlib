@@ -5,7 +5,7 @@ project(Qt-WebDAV VERSION 0.1 LANGUAGES CXX)
 
 option(BUILD_SAMPLES "Build the sample programs" ON)
 option(DEBUG "Build with debug output" OFF)
-
+option(EXTENDED_PROPERTIES "Support extended item properties" ON)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -26,9 +26,10 @@ include_directories( ${PROJECT_SOURCE_DIR} )
 
 
 message(STATUS "Building for Qt ${USE_QT_VERSION}")
-message(STATUS "Build type (-DCMAKE_BUILD_TYPE    : ${CMAKE_BUILD_TYPE}")
-message(STATUS "Building samples (-DBUILD_SAMPLES): ${BUILD_SAMPLES}")
-message(STATUS "Debug ouput (-DDEBUG)             : ${DEBUG}")
+message(STATUS "Build type (-DCMAKE_BUILD_TYPE             : ${CMAKE_BUILD_TYPE}")
+message(STATUS "Building samples (-DBUILD_SAMPLES)         : ${BUILD_SAMPLES}")
+message(STATUS "Debug ouput (-DDEBUG)                      : ${DEBUG}")
+message(STATUS "Extended properties (-DEXTENDED_PROPERTIES): ${EXTENDED_PROPERTIES}")
 
 find_package(Qt${USE_QT_VERSION} REQUIRED COMPONENTS Core Network Xml)
 
@@ -58,6 +59,9 @@ if (DEBUG)
     target_compile_definitions(Qt-WebDAV PUBLIC DEBUG_WEBDAV)
 endif()
 
+if(EXTENDED_PROPERTIES)
+    target_compile_definitions(Qt-WebDAV PUBLIC QWEBDAVITEM_EXTENDED_PROPERTIES)
+endif()
 
 if(BUILD_SAMPLES)
     project(Qt-WebDAV-sample VERSION 0.1 LANGUAGES CXX)
