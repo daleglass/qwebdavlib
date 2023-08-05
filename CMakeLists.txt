@@ -46,8 +46,11 @@ set(SAMPLE_SOURCES
 )
 
 
+
 add_library(Qt-WebDAV SHARED ${LIBRARY_SOURCES})
 target_link_libraries(Qt-WebDAV Qt${USE_QT_VERSION}::Core Qt${USE_QT_VERSION}::Network Qt${USE_QT_VERSION}::Xml)
+set_target_properties(Qt-WebDAV PROPERTIES PUBLIC_HEADER "qwebdavlib/qnaturalsort.h;qwebdavlib/qwebdav.h;qwebdavlib/qwebdavdirparser.h;qwebdavlib/qwebdavitem.h;qwebdavlib/qwebdav_global.h")
+
 
 if (MSVC)
     target_compile_options(Qt-WebDAV PUBLIC /W4 /WX)
@@ -62,6 +65,10 @@ endif()
 if(EXTENDED_PROPERTIES)
     target_compile_definitions(Qt-WebDAV PUBLIC QWEBDAVITEM_EXTENDED_PROPERTIES)
 endif()
+include(GNUInstallDirs)
+
+install(TARGETS Qt-WebDAV LIBRARY       DESTINATION "${CMAKE_INSTALL_LIBDIR}" PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/qwebdavlib" )
+install(FILES LICENSE README CHANGES DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 
 if(BUILD_SAMPLES)
     project(Qt-WebDAV-sample VERSION 0.1 LANGUAGES CXX)
@@ -75,5 +82,7 @@ if(BUILD_SAMPLES)
     else()
         target_compile_options(Qt-WebDAV-sample PUBLIC -Wall -Wextra -Werror)
     endif()
+
+    install(TARGETS Qt-WebDAV-sample RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 endif()
 
