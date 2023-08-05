@@ -52,6 +52,10 @@
 #define QWEBDAV_GLOBAL_H
 
 #include <QtCore/qglobal.h>
+#include <QLoggingCategory>
+
+Q_DECLARE_LOGGING_CATEGORY(LOG_WEBDAV)
+
 
 #if defined(QWEBDAV_LIBRARY)
 #  define QWEBDAVSHARED_EXPORT Q_DECL_EXPORT

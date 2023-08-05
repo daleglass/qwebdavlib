@@ -50,6 +50,8 @@
 
 #include "qwebdavdirparser.h"
 
+Q_LOGGING_CATEGORY(LOG_WEBDAV_DIRPARSER, "qwebdav.dirparser");
+
 
 QWebdavDirParser::QWebdavDirParser(QObject *parent) : QObject(parent)
   ,m_error(QNetworkReply::NoError)
@@ -101,9 +103,9 @@ bool QWebdavDirParser::listDirectory(QWebdav *pWebdav, const QString &path)
     connect(m_reply, SIGNAL(finished()), this, SLOT(replyFinished()));
 
 #ifdef DEBUG_WEBDAV
-    connect(m_reply, &QNetworkReply::errorOccurred, this, [](QNetworkReply::NetworkError code) { qWarning() << "Error" << code;});
-    connect(m_reply, &QNetworkReply::redirected, this, [](const QUrl &url) { qDebug() << "Redirected to" << url;});
-    connect(m_reply, &QNetworkReply::downloadProgress, this, [](qint64 recv, qint64 total) { qDebug() << "Received" << recv << "of" << total;});
+    connect(m_reply, &QNetworkReply::errorOccurred, this, [](QNetworkReply::NetworkError code) { qCWarning(LOG_WEBDAV_DIRPARSER) << "Error" << code;});
+    connect(m_reply, &QNetworkReply::redirected, this, [](const QUrl &url) { qCDebug(LOG_WEBDAV_DIRPARSER) << "Redirected to" << url;});
+    connect(m_reply, &QNetworkReply::downloadProgress, this, [](qint64 recv, qint64 total) { qCDebug(LOG_WEBDAV_DIRPARSER) << "Received" << recv << "of" << total;});
 #endif
 
     if (!m_dirList.isEmpty())
@@ -210,7 +212,7 @@ void QWebdavDirParser::replyFinished()
     QNetworkReply* reply = qobject_cast<QNetworkReply*>(QObject::sender());
 
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdavDirParser::replyFinished()";
+    qCDebug(LOG_WEBDAV_DIRPARSER) << "QWebdavDirParser::replyFinished()";
 #endif
 
     if (!reply)
@@ -218,7 +220,7 @@ void QWebdavDirParser::replyFinished()
 
     if (m_reply!=reply) {
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdavDirParser::replyFinished()  wrong reply : m_reply!=reply";
+    qCDebug(LOG_WEBDAV_DIRPARSER) << "QWebdavDirParser::replyFinished()  wrong reply : m_reply!=reply";
 #endif
         QMetaObject::invokeMethod(this,"replyDeleteLater", Qt::QueuedConnection, Q_ARG(QNetworkReply*, reply));
         return;
@@ -233,7 +235,7 @@ void QWebdavDirParser::replyFinished()
         this->m_httpCode = this->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         QString contentType = m_reply->header(QNetworkRequest::ContentTypeHeader).toString();
     #ifdef DEBUG_WEBDAV
-        qDebug() << "   Reply finished. Content header:" << contentType;
+        qCDebug(LOG_WEBDAV_DIRPARSER) << "   Reply finished. Content header:" << contentType;
     #endif
         if ( (m_reply->error() != QNetworkReply::NoError) && (m_reply->error() != QNetworkReply::OperationCanceledError) ) {
             QString errStr = m_reply->errorString();
@@ -242,18 +244,18 @@ void QWebdavDirParser::replyFinished()
 
             emit errorChanged(errStr);
     #ifdef DEBUG_WEBDAV
-            qDebug() << "   Reply has error. Error:" << m_reply->errorString() << "Code:" << m_reply->error();
+            qCDebug(LOG_WEBDAV_DIRPARSER) << "   Reply has error. Error:" << m_reply->errorString() << "Code:" << m_reply->error();
     #endif
         }
         else {
             QByteArray data = m_reply->readAll();
             //        if(data.isEmpty()) {
-            //            qDebug() << "QWebdavDirParser::replyFinished() | Reply has no data."; //<< m_reply->rawHeaderPairs();
+            //            qCDebug(LOG_WEBDAV_DIRPARSER) << "QWebdavDirParser::replyFinished() | Reply has no data."; //<< m_reply->rawHeaderPairs();
             //        }
 
             if(contentType.contains("xml")) {
                 // DEBUG
-                //qDebug() << data;
+                //qCDebug(LOG_WEBDAV_DIRPARSER) << data;
                 parseMultiResponse(data);
             }
         }
@@ -270,15 +272,15 @@ void QWebdavDirParser::replyDeleteLater(QNetworkReply* reply)
         return;
 
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdavDirParser::replyDeleteLater()   reply->url == " << reply->url().toString(QUrl::RemoveUserInfo);
-    qDebug() << "QWebdavDirParser::replyDeleteLater()      reply->isFinished() == " << reply->isFinished();
-    qDebug() << "QWebdavDirParser::replyDeleteLater()      reply->bytesAvailable() == " << reply->bytesAvailable();
-    qDebug() << "QWebdavDirParser::replyDeleteLater()      reply->bytesToWrite() == " << reply->bytesToWrite();
+    qCDebug(LOG_WEBDAV_DIRPARSER) << "QWebdavDirParser::replyDeleteLater()   reply->url == " << reply->url().toString(QUrl::RemoveUserInfo);
+    qCDebug(LOG_WEBDAV_DIRPARSER) << "QWebdavDirParser::replyDeleteLater()      reply->isFinished() == " << reply->isFinished();
+    qCDebug(LOG_WEBDAV_DIRPARSER) << "QWebdavDirParser::replyDeleteLater()      reply->bytesAvailable() == " << reply->bytesAvailable();
+    qCDebug(LOG_WEBDAV_DIRPARSER) << "QWebdavDirParser::replyDeleteLater()      reply->bytesToWrite() == " << reply->bytesToWrite();
 #endif
 
     if ((!reply->isFinished()) || reply->bytesToWrite() || reply->bytesAvailable()) {
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdavDirParser::replyDeleteLater()      reinvoke replyDeleteLater()";
+    qCDebug(LOG_WEBDAV_DIRPARSER) << "QWebdavDirParser::replyDeleteLater()      reinvoke replyDeleteLater()";
 #endif
         reply->readAll();
         reply->close();
@@ -299,7 +301,7 @@ void QWebdavDirParser::replyDeleteLater(QNetworkReply* reply)
     emit finished();
 
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdavDirParser::replyDeleteLater()      reply->deleteLater() done";
+    qCDebug(LOG_WEBDAV_DIRPARSER) << "QWebdavDirParser::replyDeleteLater()      reply->deleteLater() done";
 #endif
 
 }
@@ -419,7 +421,7 @@ void QWebdavDirParser::davParsePropstats(const QString &path, const QDomNodeList
 
         if ( status.isNull() ) {
 #ifdef DEBUG_WEBDAV
-            qDebug() << "Error, no status code in this propstat";
+            qCDebug(LOG_WEBDAV_DIRPARSER) << "Error, no status code in this propstat";
 #endif
             return;
         }
@@ -436,7 +438,7 @@ void QWebdavDirParser::davParsePropstats(const QString &path, const QDomNodeList
 
         if ( prop.isNull() ) {
 #ifdef DEBUG_WEBDAV
-            qDebug() << "Error: no prop segment in this propstat.";
+            qCDebug(LOG_WEBDAV_DIRPARSER) << "Error: no prop segment in this propstat.";
 #endif
             return;
         }
@@ -502,7 +504,7 @@ void QWebdavDirParser::davParsePropstats(const QString &path, const QDomNodeList
 #endif
 #ifdef DEBUG_WEBDAV
                 else
-                    qDebug() << "Found unknown WEBDAV property: " << property.tagName() << property.text();
+                    qCDebug(LOG_WEBDAV_DIRPARSER) << "Found unknown WEBDAV property: " << property.tagName() << property.text();
 #endif
         }
     }
@@ -576,7 +578,7 @@ QDateTime QWebdavDirParser::parseDateTime(const QString &input, const QString &t
 
 #ifdef DEBUG_WEBDAV
     if(!datetime.isValid())
-        qDebug() << "QWebdavDirParser::parseDateTime() | Unknown date time format:" << input;
+        qCDebug(LOG_WEBDAV_DIRPARSER) << "QWebdavDirParser::parseDateTime() | Unknown date time format:" << input;
 #endif
 
     return datetime;

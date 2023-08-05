@@ -50,6 +50,9 @@
 
 #include "qwebdav.h"
 
+Q_LOGGING_CATEGORY(LOG_WEBDAV, "qwebdav");
+
+
 QWebdav::QWebdav (QObject *parent) : QNetworkAccessManager(parent)
   ,m_rootPath()
   ,m_username()
@@ -175,7 +178,7 @@ void QWebdav::replyReadyRead()
 void QWebdav::replyFinished(QNetworkReply* reply)
 {
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdav::replyFinished()";
+    qCDebug(LOG_WEBDAV) << "QWebdav::replyFinished()";
 #endif
 
     disconnect(reply, SIGNAL(readyRead()), this, SLOT(replyReadyRead()));
@@ -196,7 +199,7 @@ void QWebdav::replyFinished(QNetworkReply* reply)
 void QWebdav::replyDeleteLater(QNetworkReply* reply)
 {
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdav::replyDeleteLater()";
+    qCDebug(LOG_WEBDAV) << "QWebdav::replyDeleteLater()";
 #endif
 
     QIODevice *outDataDevice = m_outDataDevices.value(reply, 0);
@@ -212,7 +215,7 @@ void QWebdav::replyError(QNetworkReply::NetworkError)
         return;
 
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdav::replyError()  reply->url() == " << reply->url().toString(QUrl::RemoveUserInfo);
+    qCDebug(LOG_WEBDAV) << "QWebdav::replyError()  reply->url() == " << reply->url().toString(QUrl::RemoveUserInfo);
 #endif
 
     if ( reply->error() == QNetworkReply::OperationCanceledError) {
@@ -230,11 +233,11 @@ void QWebdav::replyError(QNetworkReply::NetworkError)
 void QWebdav::provideAuthenication(QNetworkReply *reply, QAuthenticator *authenticator)
 {
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdav::authenticationRequired()";
+    qCDebug(LOG_WEBDAV) << "QWebdav::authenticationRequired()";
     QVariantHash opts = authenticator->options();
     QVariant optVar;
     foreach(optVar, opts) {
-        qDebug() << "QWebdav::authenticationRequired()  option == " << optVar.toString();
+        qCDebug(LOG_WEBDAV) << "QWebdav::authenticationRequired()  option == " << optVar.toString();
     }
 #endif
 
@@ -254,7 +257,7 @@ void QWebdav::provideAuthenication(QNetworkReply *reply, QAuthenticator *authent
 void QWebdav::sslErrors(QNetworkReply *reply, const QList<QSslError> &errors)
 {
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdav::sslErrors()   reply->url == " << reply->url().toString(QUrl::RemoveUserInfo);
+    qCDebug(LOG_WEBDAV) << "QWebdav::sslErrors()   reply->url == " << reply->url().toString(QUrl::RemoveUserInfo);
 #endif
 
     QSslCertificate sslcert = errors[0].certificate();
@@ -315,12 +318,12 @@ QNetworkReply* QWebdav::createRequest(const QString& method, QNetworkRequest& re
     }
 
 #ifdef DEBUG_WEBDAV
-    qDebug() << " QWebdav::createRequest1";
-    qDebug() << "   " << method << " " << req.url().toString();
+    qCDebug(LOG_WEBDAV) << " QWebdav::createRequest1";
+    qCDebug(LOG_WEBDAV) << "   " << method << " " << req.url().toString();
     QList<QByteArray> rawHeaderList = req.rawHeaderList();
     QByteArray rawHeaderItem;
     foreach(rawHeaderItem, rawHeaderList) {
-        qDebug() << "   " << rawHeaderItem << ": " << req.rawHeader(rawHeaderItem);
+        qCDebug(LOG_WEBDAV) << "   " << rawHeaderItem << ": " << req.rawHeader(rawHeaderItem);
     }
 #endif
 
@@ -338,12 +341,12 @@ QNetworkReply* QWebdav::createRequest(const QString& method, QNetworkRequest& re
     dataIO->open(QIODevice::ReadOnly);
 
 #ifdef DEBUG_WEBDAV
-    qDebug() << " QWebdav::createRequest2";
-    qDebug() << "   " << method << " " << req.url().toString();
+    qCDebug(LOG_WEBDAV) << " QWebdav::createRequest2";
+    qCDebug(LOG_WEBDAV) << "   " << method << " " << req.url().toString();
     QList<QByteArray> rawHeaderList = req.rawHeaderList();
     QByteArray rawHeaderItem;
     foreach(rawHeaderItem, rawHeaderList) {
-        qDebug() << "   " << rawHeaderItem << ": " << req.rawHeader(rawHeaderItem);
+        qCDebug(LOG_WEBDAV) << "   " << rawHeaderItem << ": " << req.rawHeader(rawHeaderItem);
     }
 #endif
 
@@ -355,7 +358,7 @@ QNetworkReply* QWebdav::createRequest(const QString& method, QNetworkRequest& re
 QNetworkReply* QWebdav::list(const QString& path)
 {
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdav::list() path = " << path;
+    qCDebug(LOG_WEBDAV) << "QWebdav::list() path = " << path;
 #endif
     return list(path, 1);
 }
@@ -427,7 +430,7 @@ QNetworkReply* QWebdav::get(const QString& path)
     reqUrl.setPath(absolutePath(path));
 
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdav::get() url = " << req.url().toString(QUrl::RemoveUserInfo);
+    qCDebug(LOG_WEBDAV) << "QWebdav::get() url = " << req.url().toString(QUrl::RemoveUserInfo);
 #endif
 
     req.setUrl(reqUrl);
@@ -450,7 +453,7 @@ QNetworkReply* QWebdav::get(const QString& path, QIODevice* data, quint64 fromRa
     req.setUrl(reqUrl);
 
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdav::get() url = " << req.url().toString(QUrl::RemoveUserInfo);
+    qCDebug(LOG_WEBDAV) << "QWebdav::get() url = " << req.url().toString(QUrl::RemoveUserInfo);
 #endif
 
     if (fromRangeInBytes>0) {
@@ -477,14 +480,14 @@ QNetworkReply* QWebdav::put(const QString& path, QIODevice* data)
     req.setUrl(reqUrl);
 
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdav::put() url = " << req.url().toString(QUrl::RemoveUserInfo);
+    qCDebug(LOG_WEBDAV) << "QWebdav::put() url = " << req.url().toString(QUrl::RemoveUserInfo);
 #endif
 
     return QNetworkAccessManager::put(req, data);
 }
 
 QNetworkReply* QWebdav::put(const QString& path, const QByteArray& data)
-{  
+{
     QNetworkRequest req;
 
     QUrl reqUrl(m_baseUrl);
@@ -493,7 +496,7 @@ QNetworkReply* QWebdav::put(const QString& path, const QByteArray& data)
     req.setUrl(reqUrl);
 
 #ifdef DEBUG_WEBDAV
-    qDebug() << "QWebdav::put() url = " << req.url().toString(QUrl::RemoveUserInfo);
+    qCDebug(LOG_WEBDAV) << "QWebdav::put() url = " << req.url().toString(QUrl::RemoveUserInfo);
 #endif
 
     return QNetworkAccessManager::put(req, data);
@@ -528,8 +531,8 @@ QNetworkReply* QWebdav::propfind(const QString& path, const QByteArray& query, i
     QUrl reqUrl(m_baseUrl);
     reqUrl.setPath(absolutePath(path));
 
-    qDebug() << "propfind query:";
-    qDebug() << query;
+    qCDebug(LOG_WEBDAV) << "propfind query:";
+    qCDebug(LOG_WEBDAV) << query;
 
     req.setUrl(reqUrl);
     req.setRawHeader("Depth", depth == 2 ? QString("infinity").toUtf8() : QString::number(depth).toUtf8());

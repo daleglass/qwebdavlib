@@ -58,11 +58,13 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomNodeList>
-
+#include <QLoggingCategory>
 #include "qwebdav_global.h"
 
 #include "qwebdav.h"
 #include "qwebdavitem.h"
+
+Q_DECLARE_LOGGING_CATEGORY(LOG_WEBDAV_DIRPARSER)
 
 class QWEBDAVSHARED_EXPORT QWebdavDirParser : public QObject
 {
